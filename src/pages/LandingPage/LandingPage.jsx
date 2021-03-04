@@ -3,25 +3,32 @@ import Alert from '@material-ui/lab/Alert'
 import { makeStyles } from '@material-ui/core/styles'
 
 import useBTCApi from '../../hooks/useBTC/useBTCApi'
+import useInterval from '../../hooks/useInterval/useInterval'
 import CurrencyOutput from '../../components/CurrencyOutput/CurrencyOutput'
 import CurrencyDropdown from '../../components/CurrencyDropdown/CurrencyDropdown'
 import Spinner from '../../components/Spinner/Spinner'
 import BtcInput from '../../components/BtcInput/BtcInput'
 
 const LandingPage = () => {
-	const [amount, setAmount] = useState(1.33)
+	const [amount, setAmount] = useState(1)
 	const [btcInput, SetBtcInput] = useState()
 	const [errorMessage, SetErrorMessage] = useState('')
 	const [inputError, setInputError] = useState(false)
 	const [removedCurrencyList, setRemovedCurrencyList] = useState([])
-	const [dataFromApi, setDataFromApi] = useState()
-
-	const { currencyValues, error, isLoading } = useBTCApi(amount)
+	const [apiDataLocalState, setApiDataLocalState] = useState()
+	const [updateTimer, setUpdateTimer] = useState(0)
 
 	const classes = useStyles()
+	const { currencyValues, error, isLoading } = useBTCApi(amount, updateTimer)
 
+	// API is called every 60s
+	useInterval(() => {
+		setUpdateTimer((prev) => prev + 1)
+	}, 60000)
+
+	// storing api data to local state
 	useEffect(() => {
-		setDataFromApi(currencyValues)
+		setApiDataLocalState(currencyValues)
 	}, [currencyValues])
 
 	function handleCurrencyRemoval(currency) {
@@ -30,11 +37,11 @@ const LandingPage = () => {
 		)
 		let valueToStore = removedValue[0]
 		setRemovedCurrencyList((prev) => [...prev, valueToStore])
-		let newCurrencyLit = [...dataFromApi]
+		let newCurrencyLit = [...apiDataLocalState]
 		let listWithRemovedValues = newCurrencyLit.filter(
 			(item) => item.code !== currency
 		)
-		setDataFromApi(listWithRemovedValues)
+		setApiDataLocalState(listWithRemovedValues)
 	}
 
 	function addRemovedCurrency(data) {
@@ -45,13 +52,14 @@ const LandingPage = () => {
 		)
 
 		setRemovedCurrencyList(updatedValues)
-		setDataFromApi((prev) => [...prev, data])
+		setApiDataLocalState((prev) => [...prev, data])
 	}
 
 	// ar man cia reikia dvieju stepu ar tai ok input handlinimas reacte
 	function handleSubmit(event) {
 		event.preventDefault()
 		setAmount(btcInput)
+		event.target.reset()
 	}
 
 	function handleInputError(event) {
@@ -77,16 +85,23 @@ const LandingPage = () => {
 					handleInput={handleInputError}
 				/>
 			</form>
-			{isLoading ? <Spinner /> : null}
+			{isLoading ? (
+				<Spinner />
+			) : (
+				<p className={classes.infoText}>
+					Exchange rate for {amount} BTC
+				</p>
+			)}
 			{error ? (
 				<Alert className={classes.error} severity="warning">
 					Something went wrong, check your internet connection or try
 					latter.
 				</Alert>
 			) : null}
-			<ul>
-				{dataFromApi
-					? dataFromApi.map((currency) => (
+
+			<ul className={classes.ul}>
+				{apiDataLocalState
+					? apiDataLocalState.map((currency) => (
 							<CurrencyOutput
 								handleRemove={handleCurrencyRemoval}
 								key={currency.code}
@@ -119,5 +134,13 @@ const useStyles = makeStyles((theme) => ({
 	error: {
 		marginBottom: '0.75rem',
 		justifyContent: 'center',
+	},
+	infoText: {
+		paddingTop: '1rem',
+		display: 'flex',
+		justifyContent: 'center',
+	},
+	ul: {
+		paddingTop: '2rem',
 	},
 }))

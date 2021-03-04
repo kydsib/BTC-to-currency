@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import FormControl from '@material-ui/core/FormControl'
 import Select from '@material-ui/core/Select'
@@ -8,15 +8,8 @@ import InputLabel from '@material-ui/core/InputLabel'
 const CurrencyDropdown = ({ itemsToShow, handleAddCurrency }) => {
 	const classes = useStyles()
 
-	const dropdownItems = itemsToShow.map((item) => (
-		<MenuItem key={item.rate} value={item.code}>
-			{item.code}
-		</MenuItem>
-	))
-
 	function handleChange(event) {
 		const value = event.target.value
-
 		const addValueFormList = itemsToShow.filter(
 			(item) => item.code === value
 		)
@@ -25,25 +18,32 @@ const CurrencyDropdown = ({ itemsToShow, handleAddCurrency }) => {
 		handleAddCurrency(currencyToAdd)
 	}
 
+	// Error regarding Material-ui findDOMNode is deprecated in StrictMode.
+	// related to Select options being rendered conditionaly
+
 	return (
-		<Fragment>
+		<div className={classes.root}>
 			<FormControl className={classes.formControl}>
 				<InputLabel id="dropdown">Add currency</InputLabel>
-				<Select
-					labelId="dropdown"
-					id="demo-simple-select"
-					onChange={handleChange}
-				>
-					{dropdownItems}
+				<Select value="" labelId="dropdown" onChange={handleChange}>
+					{itemsToShow.map((item) => (
+						<MenuItem key={item.rate} value={item.code}>
+							{item.code}
+						</MenuItem>
+					))}
 				</Select>
 			</FormControl>
-		</Fragment>
+		</div>
 	)
 }
 
 export default CurrencyDropdown
 
 const useStyles = makeStyles((theme) => ({
+	root: {
+		display: 'flex',
+		justifyContent: 'center',
+	},
 	formControl: {
 		margin: theme.spacing(1),
 		minWidth: 120,

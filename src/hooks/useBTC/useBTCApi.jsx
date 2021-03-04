@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 
-export default function useBTCApi(amount) {
+export default function useBTCApi(amount, updateTimer) {
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState(false)
 	const [currencyValues, setCurrencyValues] = useState([])
 
 	useEffect(() => {
+		// resets values when new request is sent
 		setCurrencyValues([])
 	}, [amount])
 
@@ -23,7 +24,7 @@ export default function useBTCApi(amount) {
 					let data = await response.json()
 					let finalData = Object.values(data.bpi)
 
-					setCurrencyValues((prev) => [...prev, ...finalData])
+					setCurrencyValues([...finalData])
 				}
 
 				setIsLoading(false)
@@ -35,7 +36,7 @@ export default function useBTCApi(amount) {
 		}
 
 		getCurrencyValues()
-	}, [amount])
+	}, [amount, updateTimer])
 
 	return { currencyValues, error, isLoading }
 }

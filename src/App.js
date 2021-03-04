@@ -1,16 +1,13 @@
-
-import './App.css';
-
 import GlobalStyles from './theme/global'
 import LandingPage from './pages/LandingPage/LandingPage'
 
 function App() {
-  return (
-    <div className="App">
-      <GlobalStyles />
-      <LandingPage />
-    </div>
-  );
+	return (
+		<div>
+			<GlobalStyles />
+			<LandingPage />
+		</div>
+	)
 }
 
-export default App;
+export default App
