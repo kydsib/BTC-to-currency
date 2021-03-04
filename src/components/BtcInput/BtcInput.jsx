@@ -1,11 +1,29 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Button from '@material-ui/core/Button'
 import InputAdornment from '@material-ui/core/InputAdornment'
 import TextField from '@material-ui/core/TextField'
 import Search from '@material-ui/icons/Search'
 
-const BtcInput = ({ inputError, errorMessage, handleInput }) => {
+const BtcInput = ({ handleInput }) => {
+	const [inputError, setInputError] = useState(false)
+	const [errorMessage, SetErrorMessage] = useState('')
+
 	let errorHelperText, isErrorPresent, inputTextStyling, labelText
+
+	// Testing new implementation
+	function handleInputError(event) {
+		const regex = /^[0-9,.]*$/
+		const value = event.target.value
+
+		if (value.match(regex)) {
+			const valueWithoutComma = value.replace(/,/g, '.')
+			handleInput(valueWithoutComma)
+			setInputError(false)
+		} else if (!value.match(regex)) {
+			setInputError(true)
+			SetErrorMessage('Only numbers are allowed')
+		}
+	}
 
 	// UI changes related to error
 	if (inputError) {
@@ -27,7 +45,8 @@ const BtcInput = ({ inputError, errorMessage, handleInput }) => {
 			helperText={errorHelperText}
 			label={labelText}
 			variant="outlined"
-			onChange={handleInput}
+			onChange={handleInputError}
+			// onChange={handleInput}
 			InputProps={{
 				endAdornment: (
 					<InputAdornment position="end">
